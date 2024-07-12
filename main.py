@@ -2,16 +2,16 @@ import classes
 
 
 if __name__ == "__main__":
-    f = classes.Field(1, 1)
+    f = classes.Field(4, 3)
 
     while True:
         ans = input("Wanna play?(Y/n)")
         if ans == 'Y':
             f.start_game()
             print("Game is started! Print\n",
-                  "check\n",
-                  "mark\n",
-                  "unmark\n")
+                  "c\n",
+                  "f\n",
+                  "uf\n")
             f.show_field()
             flag = True
 
@@ -20,11 +20,11 @@ if __name__ == "__main__":
                 cmd = input().split()
                 x, y = int(cmd[1]), int(cmd[2])
                 match cmd[0]:
-                    case 'check':
+                    case 'c':
                         f.check(x, y)
-                    case 'mark':
+                    case 'f':
                         f.mark(x, y)
-                    case 'unmark':
+                    case 'uf':
                         f.unmark(x, y)
 
                 is_win: int = f.check_win()
