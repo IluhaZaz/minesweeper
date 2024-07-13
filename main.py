@@ -2,7 +2,7 @@ import classes
 
 
 if __name__ == "__main__":
-    f = classes.Field(4, 3)
+    f = classes.Field(5, 2)
 
     while True:
         ans = input("Wanna play?(Y/n)")
@@ -10,8 +10,7 @@ if __name__ == "__main__":
             f.start_game()
             print("Game is started! Print\n",
                   "c\n",
-                  "f\n",
-                  "uf\n")
+                  "f\n")
             f.show_field()
             flag = True
 
@@ -24,8 +23,6 @@ if __name__ == "__main__":
                         f.check(x, y)
                     case 'f':
                         f.mark(x, y)
-                    case 'uf':
-                        f.unmark(x, y)
 
                 is_win: int = f.check_win()
                 if is_win == 1:

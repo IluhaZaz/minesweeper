@@ -122,6 +122,24 @@ class Field:
             obj.is_shown = True
         self.is_active = False
     
+    def show_near_zeros(self, pos: tuple[int], visited: list = []):
+        if self.field.get(pos, None) is None:
+            return
+        if pos in visited:
+            return
+        self.field[pos].show()
+        visited.append(pos)
+        if self.field[pos].near_cnt == 0:
+            around = []
+            x, y = pos
+            for i in range(-1, 2):
+                for j in range(-1, 2):
+                    around.append((x + i, y + j))
+            around.remove((x, y))
+            for neighbour in around:
+                self.show_near_zeros(neighbour, visited)
+
+    
     def check(self, x: int, y: int) -> int:
         pos = (y - 1, x - 1)
         self.field[pos].is_shown = True
@@ -129,6 +147,8 @@ class Field:
             self.field[pos].boom()
             return -1
         self.field[pos].show()
+        if self.field[pos].near_cnt == 0:
+            self.show_near_zeros(pos)
         return self.field[pos].near_cnt
     
     def mark(self, x: int, y: int) -> bool:
