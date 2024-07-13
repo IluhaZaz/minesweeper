@@ -1,5 +1,7 @@
 from random import randint
 
+from constants import SIZE_START_CNT, MINES_START_CNT
+
 class Cell:
     def __init__(self):
         self.is_shown = False
@@ -63,6 +65,9 @@ class Empty(Cell):
 
 class Field:
     def __init__(self, size: int, mines_cnt: int) -> None:
+        if size**2 < mines_cnt:
+            size = SIZE_START_CNT
+            mines_cnt = MINES_START_CNT
         self.size = size
         self.mines_cnt = mines_cnt
         self.is_active = False
