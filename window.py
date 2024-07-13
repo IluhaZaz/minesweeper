@@ -56,7 +56,7 @@ class Ui_MainWindow(object):
             self.cells[cell_num].setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
             self.field.end_game(False)
             self.show_field()
-            self.smile.setPixmap(QtGui.QPixmap("pictures\\sad.jpg"))
+            self.smile.setIcon(QtGui.QIcon("pictures\\sad.jpg"))
         else:
             self.cells[cell_num].setText(str(res))
     
@@ -71,10 +71,10 @@ class Ui_MainWindow(object):
 
         match(self.check_win()):
             case 1:
-                self.smile.setPixmap(QtGui.QPixmap("pictures\\joy.jpg"))
+                self.smile.setIcon(QtGui.QIcon("pictures\\joy.jpg"))
                 self.show_field()
             case -1:
-                self.smile.setPixmap(QtGui.QPixmap("pictures\\sad.jpg"))
+                self.smile.setIcon(QtGui.QIcon("pictures\\sad.jpg"))
                 self.show_field()
 
     def show_field(self):
@@ -88,7 +88,11 @@ class Ui_MainWindow(object):
                 self.cells[cell_num].setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
             else:
                 self.cells[cell_num].setText(str(self.field.field[pos].near_cnt))
-
+    
+    def restart(self, MainWindow):
+        self.setupUi(MainWindow)
+        self.btn_cliked = 0
+        self.field.start_game()
 
     def setupUi(self, MainWindow):
 
@@ -99,16 +103,16 @@ class Ui_MainWindow(object):
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("Minesweeper")
-
-        pixmap = QtGui.QPixmap("pictures\\normal.jpg")
         
         self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(40, 40, CELL_SIZE*(size), CELL_SIZE*size))
         self.widget.setObjectName("widget")
 
-        self.smile = QtWidgets.QLabel(self.centralwidget)
-        self.smile.setPixmap(pixmap)
-        self.smile.setGeometry(CELL_SIZE*(size) + 40 + 50, 50, pixmap.width(), pixmap.height())
+        self.smile = QtWidgets.QPushButton(self.centralwidget)
+        self.smile.setIcon(QtGui.QIcon("pictures\\normal.jpg"))
+        self.smile.setIconSize(QtCore.QSize(2*CELL_SIZE, 2*CELL_SIZE))
+        self.smile.setGeometry(CELL_SIZE*(size) + 40 + 50, 50, 2*CELL_SIZE, 2*CELL_SIZE)
+        self.smile.clicked.connect(lambda state: self.restart(MainWindow))
 
         self.gridLayout = QtWidgets.QGridLayout(spacing = 0)
         self.gridLayout.setObjectName("gridLayout")
