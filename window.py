@@ -9,6 +9,14 @@
 
 CELL_SIZE = 100
 
+MIN_MINES_CNT = 1
+MAX_MINES_CNT = 50
+MINES_START_CNT = 5
+
+MIN_SIZE_CNT = 1
+MAX_SIZE_CNT = 50
+SIZE_START_CNT = 5
+
 
 from classes import Field, Mine, Empty
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -90,9 +98,16 @@ class Ui_MainWindow(object):
                 self.cells[cell_num].setText(str(self.field.field[pos].near_cnt))
     
     def restart(self, MainWindow):
+        self.field = Field(int(self.size_label.text()[6:]) ,
+                           int(self.mines_label.text()[13:]))
         self.setupUi(MainWindow)
         self.btn_cliked = 0
-        self.field.start_game()
+
+    def onchange_mines_slider(self, val:int):
+        self.mines_label.setText(f"Mines count: {val}")
+
+    def onchange_size_slider(self, val:int):
+        self.size_label.setText(f"Size: {val}")
 
     def setupUi(self, MainWindow):
 
@@ -113,6 +128,34 @@ class Ui_MainWindow(object):
         self.smile.setIconSize(QtCore.QSize(2*CELL_SIZE, 2*CELL_SIZE))
         self.smile.setGeometry(CELL_SIZE*(size) + 40 + 50, 50, 2*CELL_SIZE, 2*CELL_SIZE)
         self.smile.clicked.connect(lambda state: self.restart(MainWindow))
+
+        self.mines_slider = QtWidgets.QSlider(self.centralwidget)
+        self.mines_slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.mines_slider.setRange(MIN_MINES_CNT, MAX_MINES_CNT)
+        self.mines_slider.setValue(MINES_START_CNT)
+        self.mines_slider.setFixedWidth(2*CELL_SIZE)
+        self.mines_slider.move(CELL_SIZE*(size) + 40 + 50, 70 + 2*CELL_SIZE)
+        
+        self.mines_label = QtWidgets.QLabel(self.centralwidget)
+        self.mines_label.move(CELL_SIZE*(size + 1), 3*CELL_SIZE)
+        self.mines_label.setText(f"Mines count: {MINES_START_CNT}")
+        self.mines_label.setFixedWidth(2*CELL_SIZE)
+
+        self.mines_slider.valueChanged.connect(self.onchange_mines_slider)
+
+        self.size_slider = QtWidgets.QSlider(self.centralwidget)
+        self.size_slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.size_slider.setRange(MIN_SIZE_CNT, MAX_SIZE_CNT)
+        self.size_slider.setValue(SIZE_START_CNT)
+        self.size_slider.setFixedWidth(2*CELL_SIZE)
+        self.size_slider.move(CELL_SIZE*(size) + 40 + 50, 70 + 3*CELL_SIZE)
+        
+        self.size_label = QtWidgets.QLabel(self.centralwidget)
+        self.size_label.move(CELL_SIZE*(size + 1), 4*CELL_SIZE)
+        self.size_label.setText(f"Size: {SIZE_START_CNT}")
+        self.size_label.setFixedWidth(2*CELL_SIZE)
+
+        self.size_slider.valueChanged.connect(self.onchange_size_slider)
 
         self.gridLayout = QtWidgets.QGridLayout(spacing = 0)
         self.gridLayout.setObjectName("gridLayout")
