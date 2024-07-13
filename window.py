@@ -9,20 +9,86 @@
 
 CELL_SIZE = 100
 
+
+from classes import Field
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_MainWindow(object):
-    def setupUi(self, MainWindow, size: int, mines_cnt: int):
+
+    def __init__(self, size: int, mines_cnt: int):
+        self.field = Field(size, mines_cnt)
+        self.field.start_game()
+        self.btn_cliked: int = 0
+
+    def onclick_cell(self, cell_num: int):
+        if self.btn_cliked%2 == 0:
+            self.check_and_show(cell_num)
+        else:
+            self.set_flag(cell_num)
+    
+    def onclick_btn(self):
+        self.btn_cliked += 1
+        if self.btn_cliked%2 == 0:
+            self.btn.setIcon(QtGui.QIcon("pictures\\shovel.png"))
+            self.btn.setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
+        else:
+            self.btn.setIcon(QtGui.QIcon("pictures\\flag.png"))
+            self.btn.setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
+    
+    def check_win(self) -> int:
+        match(self.field.check_win()):
+            case -1:
+                self.field.end_game(False)
+                return -1
+            case 1:
+                self.field.end_game(True)
+                return 1
+        return 0
+            
+
+    def check_and_show(self, cell_num: int):
+        res = self.field.check(cell_num//self.field.size + 1, cell_num%self.field.size + 1)
+        if res == -1:
+            self.cells[cell_num].setIcon(QtGui.QIcon("pictures\\boom.jpg"))
+            self.cells[cell_num].setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
+            self.field.end_game(False)
+            self.smile.setPixmap(QtGui.QPixmap("pictures\\sad.jpg"))
+        else:
+            self.cells[cell_num].setText(str(res))
+    
+    def set_flag(self, cell_num: int):
+        if self.field.mark(cell_num//self.field.size + 1, cell_num%self.field.size + 1):
+            self.cells[cell_num].setIcon(QtGui.QIcon("pictures\\flag.png"))
+            self.cells[cell_num].setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
+        else:
+            self.cells[cell_num].setIcon(QtGui.QIcon())
+
+        match(self.check_win()):
+            case 1:
+                self.smile.setPixmap(QtGui.QPixmap("pictures\\joy.jpg"))
+            case -1:
+                self.smile.setPixmap(QtGui.QPixmap("pictures\\sad.jpg"))
+
+    def setupUi(self, MainWindow):
+
+        size = self.field.size
+
         MainWindow.setObjectName("Minesweeper")
-        MainWindow.resize(800, 800)
+        MainWindow.resize(2*CELL_SIZE*(size), 800)
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("Minesweeper")
+
+        pixmap = QtGui.QPixmap("pictures\\normal.jpg")
         
         self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(40, 40, CELL_SIZE*(size), CELL_SIZE*size))
         self.widget.setObjectName("widget")
+
+        self.smile = QtWidgets.QLabel(self.centralwidget)
+        self.smile.setPixmap(pixmap)
+        self.smile.setGeometry(CELL_SIZE*(size) + 40 + 50, 50, pixmap.width(), pixmap.height())
 
         self.gridLayout = QtWidgets.QGridLayout(spacing = 0)
         self.gridLayout.setObjectName("gridLayout")
@@ -32,25 +98,20 @@ class Ui_MainWindow(object):
         self.cells: list[QtWidgets.QPushButton] = []
         for i in range(size**2):
             self.cells.append(QtWidgets.QPushButton(self.widget))
-            self.cells[-1].setObjectName(f"pushButton{i}")
-            self.cells[-1].setFixedSize(CELL_SIZE, CELL_SIZE)
-            self.cells[-1].setStyleSheet("border :3px solid ;"
+            self.cells[i].setObjectName(str(i))
+            self.cells[i].setFixedSize(CELL_SIZE, CELL_SIZE)
+            self.cells[i].setStyleSheet("border :3px solid ;"
                                          "background-color: gray;")
             self.gridLayout.addWidget(self.cells[i], i//size, i%size, 1, 1)
+            self.cells[i].clicked.connect(lambda state, x = i: self.onclick_cell(x))
         
-        self.check_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.check_btn.setObjectName("check_btn")
-        self.check_btn.setIcon(QtGui.QIcon("pictures\\shovel.png"))
-        self.check_btn.setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
-        self.check_btn.setFixedSize(CELL_SIZE, CELL_SIZE)
-        self.check_btn.setGeometry(QtCore.QRect(40 + CELL_SIZE, 6*CELL_SIZE, CELL_SIZE*size, CELL_SIZE*size))
-
-        self.flag_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.flag_btn.setObjectName("flag_btn")
-        self.flag_btn.setIcon(QtGui.QIcon("pictures\\flag.png"))
-        self.flag_btn.setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
-        self.flag_btn.setFixedSize(CELL_SIZE, CELL_SIZE)
-        self.flag_btn.setGeometry(QtCore.QRect(40 + (size - 2)*CELL_SIZE, 6*CELL_SIZE, CELL_SIZE*size, CELL_SIZE*size))
+        self.btn = QtWidgets.QPushButton(self.centralwidget)
+        self.btn.setObjectName("check_btn")
+        self.btn.setIcon(QtGui.QIcon("pictures\\shovel.png"))
+        self.btn.setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
+        self.btn.setFixedSize(CELL_SIZE, CELL_SIZE)
+        self.btn.setGeometry(QtCore.QRect(40 + 2*CELL_SIZE, 6*CELL_SIZE, CELL_SIZE*size, CELL_SIZE*size))
+        self.btn.clicked.connect(self.onclick_btn)
 
         
         MainWindow.setCentralWidget(self.centralwidget)
@@ -61,7 +122,7 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow, 5, 5)
+    ui = Ui_MainWindow(5, 5)
+    ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())

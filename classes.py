@@ -117,23 +117,22 @@ class Field:
             obj.is_shown = True
         self.is_active = False
     
-    def check(self, x: int, y: int) -> bool:
+    def check(self, x: int, y: int) -> int:
         pos = (y - 1, x - 1)
         self.field[pos].is_shown = True
         if type(self.field[pos]) == Mine:
             self.field[pos].boom()
-            self.end_game(False)
-            return False
+            return -1
         self.field[pos].show()
-        return True
+        return self.field[pos].near_cnt
     
-    def mark(self, x: int, y: int) -> None:
+    def mark(self, x: int, y: int) -> bool:
         pos = (y - 1, x - 1)
-        self.field[pos].mark()
-    
-    def unmark(self, x: int, y: int) -> None:
-        pos = (y - 1, x - 1)
+        if self.field[pos].state.public == '| |':
+            self.field[pos].mark()
+            return True
         self.field[pos].unmark()
+        return False
 
     def check_win(self) -> int:
         res: int = 1
