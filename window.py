@@ -10,7 +10,7 @@
 CELL_SIZE = 100
 
 
-from classes import Field
+from classes import Field, Mine, Empty
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -48,16 +48,21 @@ class Ui_MainWindow(object):
             
 
     def check_and_show(self, cell_num: int):
+        if not self.field.is_active:
+            return
         res = self.field.check(cell_num//self.field.size + 1, cell_num%self.field.size + 1)
         if res == -1:
             self.cells[cell_num].setIcon(QtGui.QIcon("pictures\\boom.jpg"))
             self.cells[cell_num].setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
             self.field.end_game(False)
+            self.show_field()
             self.smile.setPixmap(QtGui.QPixmap("pictures\\sad.jpg"))
         else:
             self.cells[cell_num].setText(str(res))
     
     def set_flag(self, cell_num: int):
+        if not self.field.is_active:
+            return
         if self.field.mark(cell_num//self.field.size + 1, cell_num%self.field.size + 1):
             self.cells[cell_num].setIcon(QtGui.QIcon("pictures\\flag.png"))
             self.cells[cell_num].setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
@@ -67,8 +72,23 @@ class Ui_MainWindow(object):
         match(self.check_win()):
             case 1:
                 self.smile.setPixmap(QtGui.QPixmap("pictures\\joy.jpg"))
+                self.show_field()
             case -1:
                 self.smile.setPixmap(QtGui.QPixmap("pictures\\sad.jpg"))
+                self.show_field()
+
+    def show_field(self):
+        size = self.field.size
+        for cell_num in range(size**2):
+            pos = (cell_num%self.field.size, cell_num//self.field.size)
+            if type(self.field.field[pos]) == Mine:
+                self.cells[cell_num].setIcon(QtGui.QIcon("pictures\\mine.png" 
+                                                         if self.field.field[pos].state.hidden == '🧨' 
+                                                         else "pictures\\boom.jpg"))
+                self.cells[cell_num].setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
+            else:
+                self.cells[cell_num].setText(str(self.field.field[pos].near_cnt))
+
 
     def setupUi(self, MainWindow):
 
