@@ -1,4 +1,4 @@
-from classes import Field, Mine, Empty
+from classes import Field, Mine
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from constants import *
@@ -90,15 +90,17 @@ class Ui_MainWindow(object):
                     self.cells[cell_num].setText(str(self.field.field[pos].near_cnt))
 
     
-    def restart(self, MainWindow: QtWidgets.QMainWindow):        
+    def restart(self, MainWindow: QtWidgets.QMainWindow):     
 
-        self.field = Field(int(self.size_label.text()[6:]) ,
+        self.field = Field(int(self.size_label.text()[6:]), 
                            int(self.mines_label.text()[13:]))
         self.field.start_game()
         
         self.btn_cliked = 0
 
         self.setupUi(MainWindow)
+        self.mines_slider.setValue(self.field.mines_cnt)
+        self.size_slider.setValue(self.field.size)
 
     def onchange_mines_slider(self, val:int):
         self.mines_label.setText(f"Mines count: {val}")
@@ -111,32 +113,37 @@ class Ui_MainWindow(object):
         size = self.field.size
 
         MainWindow.setObjectName("Minesweeper")
-        MainWindow.resize(CELL_SIZE*(size + 4), CELL_SIZE*(size + 2))
+        MainWindow.resize(round(CELL_SIZE*(size + 3.5) + 2*HORIZONTAL_PADDING), 
+                          round(CELL_SIZE*(size + 2) + 2*VERTICAL_PADDING))
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("Minesweeper")
         
         self.widget = QtWidgets.QWidget(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(40, 40, CELL_SIZE*(size), CELL_SIZE*size))
+        self.widget.setGeometry(HORIZONTAL_PADDING, VERTICAL_PADDING,
+                                CELL_SIZE*size, CELL_SIZE*size)
         self.widget.setObjectName("widget")
 
         self.smile = QtWidgets.QPushButton(self.centralwidget)
         self.smile.setIcon(QtGui.QIcon("pictures\\normal.jpg"))
         self.smile.setIconSize(QtCore.QSize(2*CELL_SIZE, 2*CELL_SIZE))
-        self.smile.setGeometry(CELL_SIZE*(size) + 40 + 50, 50, 2*CELL_SIZE, 2*CELL_SIZE)
+        self.smile.setGeometry(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+                               VERTICAL_PADDING + 10, 3*CELL_SIZE, 3*CELL_SIZE)
         self.smile.clicked.connect(lambda state, val = MainWindow: self.restart(val))
 
         self.mines_slider = QtWidgets.QSlider(self.centralwidget)
         self.mines_slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.mines_slider.setRange(MIN_MINES_CNT, MAX_MINES_CNT)
         self.mines_slider.setValue(MINES_START_CNT)
-        self.mines_slider.setFixedWidth(2*CELL_SIZE)
-        self.mines_slider.move(CELL_SIZE*(size) + 40 + 50, 70 + 2*CELL_SIZE)
+        self.mines_slider.setFixedWidth(3*CELL_SIZE)
+        self.mines_slider.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+                               VERTICAL_PADDING + 3*CELL_SIZE + 20)
         
         self.mines_label = QtWidgets.QLabel(self.centralwidget)
-        self.mines_label.move(CELL_SIZE*(size + 1), 3*CELL_SIZE)
+        self.mines_label.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+                              VERTICAL_PADDING + 3*CELL_SIZE + 40)
         self.mines_label.setText(f"Mines count: {self.field.mines_cnt}")
-        self.mines_label.setFixedWidth(2*CELL_SIZE)
+        self.mines_label.setFixedWidth(3*CELL_SIZE)
 
         self.mines_slider.valueChanged.connect(self.onchange_mines_slider)
 
@@ -144,13 +151,15 @@ class Ui_MainWindow(object):
         self.size_slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.size_slider.setRange(MIN_SIZE_CNT, MAX_SIZE_CNT)
         self.size_slider.setValue(SIZE_START_CNT)
-        self.size_slider.setFixedWidth(2*CELL_SIZE)
-        self.size_slider.move(CELL_SIZE*(size) + 40 + 50, 70 + 3*CELL_SIZE)
+        self.size_slider.setFixedWidth(3*CELL_SIZE)
+        self.size_slider.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+                              VERTICAL_PADDING + 3*CELL_SIZE + 60)
         
         self.size_label = QtWidgets.QLabel(self.centralwidget)
-        self.size_label.move(CELL_SIZE*(size + 1), 4*CELL_SIZE)
+        self.size_label.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+                             VERTICAL_PADDING + 3*CELL_SIZE + 80)
         self.size_label.setText(f"Size: {self.field.size}")
-        self.size_label.setFixedWidth(2*CELL_SIZE)
+        self.size_label.setFixedWidth(3*CELL_SIZE)
 
         self.size_slider.valueChanged.connect(self.onchange_size_slider)
 
@@ -173,9 +182,9 @@ class Ui_MainWindow(object):
         self.btn.setObjectName("check_btn")
         self.btn.setIcon(QtGui.QIcon("pictures\\shovel.png"))
         self.btn.setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
-        self.btn.setFixedSize(CELL_SIZE, CELL_SIZE)
-        self.btn.setGeometry(QtCore.QRect(40 + 2*CELL_SIZE, (size + 1)*CELL_SIZE, 
-                                          CELL_SIZE*size, CELL_SIZE*size))
+        self.btn.setFixedSize(round(1.5*CELL_SIZE), round(1.5*CELL_SIZE))
+        self.btn.setGeometry(HORIZONTAL_PADDING + round((size/2 - 0.75)*CELL_SIZE), 
+                             round((size + 0.75)*CELL_SIZE), CELL_SIZE, CELL_SIZE)
         self.btn.clicked.connect(self.onclick_btn)
 
         
