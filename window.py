@@ -1,9 +1,5 @@
 from classes import Field, Mine, Empty
 from PyQt5 import QtCore, QtGui, QtWidgets
-from icecream import ic
-def out(val):
-    return val.__dict__
-ic.configureOutput(argToStringFunction=out)
 
 from constants import *
 
@@ -19,7 +15,6 @@ class Ui_MainWindow(object):
             self.check_and_show(cell_num)
         else:
             self.set_flag(cell_num)
-        ic(self.field)
     
     def onclick_btn(self):
         self.btn_cliked += 1
@@ -44,6 +39,9 @@ class Ui_MainWindow(object):
     def check_and_show(self, cell_num: int):
         if not self.field.is_active:
             return
+        if self.field.field[cell_num%self.field.size, 
+                            cell_num//self.field.size].state.public == ' 🚩':
+            return
         res = self.field.check(cell_num//self.field.size + 1, cell_num%self.field.size + 1)
         self.show_field()
         if res == -1:
@@ -52,6 +50,8 @@ class Ui_MainWindow(object):
     
     def set_flag(self, cell_num: int):
         if not self.field.is_active:
+            return        
+        if self.field.field[cell_num%self.field.size, cell_num//self.field.size].is_shown:
             return
         if self.field.mark(cell_num//self.field.size + 1, cell_num%self.field.size + 1):
             self.cells[cell_num].setIcon(QtGui.QIcon("pictures\\flag.png"))
@@ -62,9 +62,6 @@ class Ui_MainWindow(object):
         match(self.check_win()):
             case 1:
                 self.smile.setIcon(QtGui.QIcon("pictures\\joy.jpg"))
-                self.show_all()
-            case -1:
-                self.smile.setIcon(QtGui.QIcon("pictures\\sad.jpg"))
                 self.show_all()
 
     def show_all(self):
@@ -93,17 +90,14 @@ class Ui_MainWindow(object):
                     self.cells[cell_num].setText(str(self.field.field[pos].near_cnt))
 
     
-    def restart(self, MainWindow: QtWidgets.QMainWindow):
+    def restart(self, MainWindow: QtWidgets.QMainWindow):        
 
-        field = Field(int(self.size_label.text()[6:]) ,
+        self.field = Field(int(self.size_label.text()[6:]) ,
                            int(self.mines_label.text()[13:]))
-        
-        self.__dict__ = {}
-        MainWindow.__dict__ = {}
-        self.field = field
         self.field.start_game()
         
         self.btn_cliked = 0
+
         self.setupUi(MainWindow)
 
     def onchange_mines_slider(self, val:int):
@@ -111,17 +105,6 @@ class Ui_MainWindow(object):
 
     def onchange_size_slider(self, val:int):
         self.size_label.setText(f"Size: {val}")
-
-    def generate_cells(self, size: int):
-        self.cells: list[QtWidgets.QPushButton] = []
-        for i in range(size**2):
-            self.cells.append(QtWidgets.QPushButton(self.widget))
-            self.cells[i].setObjectName(str(i))
-            self.cells[i].setFixedSize(CELL_SIZE, CELL_SIZE)
-            self.cells[i].setStyleSheet("border :3px solid ;"
-                                         "background-color: gray;")
-            self.gridLayout.addWidget(self.cells[i], i//size, i%size, 1, 1)
-            self.cells[i].clicked.connect(lambda state, x = i: self.onclick_cell(x))
 
     def setupUi(self, MainWindow: QtWidgets.QMainWindow):
 
@@ -176,7 +159,15 @@ class Ui_MainWindow(object):
 
         self.widget.setLayout(self.gridLayout)
 
-        self.generate_cells(size)
+        self.cells: list[QtWidgets.QPushButton] = []
+        for i in range(size**2):
+            self.cells.append(QtWidgets.QPushButton(self.widget))
+            self.cells[i].setObjectName(str(i))
+            self.cells[i].setFixedSize(CELL_SIZE, CELL_SIZE)
+            self.cells[i].setStyleSheet("border :3px solid ;"
+                                         "background-color: gray;")
+            self.gridLayout.addWidget(self.cells[i], i//size, i%size, 1, 1)
+            self.cells[i].clicked.connect(lambda state, x = i: self.onclick_cell(x))
         
         self.btn = QtWidgets.QPushButton(self.centralwidget)
         self.btn.setObjectName("check_btn")

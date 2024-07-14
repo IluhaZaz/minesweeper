@@ -1,17 +1,19 @@
 from random import randint
-from icecream import ic
 
 from constants import SIZE_START_CNT, MINES_START_CNT
+
 
 class Cell:
     def __init__(self):
         self.is_shown = False
+
 
 class MineStates:
     def __init__(self) -> None:
         self.states = [f'|💥|', '🧨', ' 🚩']
         self.hidden = '🧨'
         self.public = '| |'
+
 
 class Mine(Cell):
     def __init__(self) -> None:
@@ -35,12 +37,14 @@ class Mine(Cell):
             return self.state.hidden
         else:
             return self.state.public
+        
 
 class EmptyStates:
     def __init__(self) -> None:
         self.states = ['?', ' 🚩']
         self.hidden = '?'
         self.public = '| |'
+
 
 class Empty(Cell):
     def __init__(self) -> None:
@@ -56,12 +60,6 @@ class Empty(Cell):
 
     def unmark(self) -> None:
         self.state.public = '| |'
-    
-    def __str__(self) -> str:
-        if self.is_shown:
-            return f"|{self.near_cnt}|"
-        else:
-            return self.state.public
         
 
 class Field:
@@ -93,7 +91,6 @@ class Field:
                         if type(self.field[neighbour]) == Empty:
                             self.field[neighbour].near_cnt += 1
         
-
     def start_game(self) -> None:
         for x in range(self.size):
             for y in range(self.size):
@@ -123,13 +120,13 @@ class Field:
             obj.is_shown = True
         self.is_active = False
     
-    def show_near_zeros(self, pos: tuple[int], visited: set = set()):
+    def show_near_zeros(self, pos: tuple[int], visited: list):
         if self.field.get(pos, None) is None:
             return
         self.field[pos].show()
         if pos in visited:
             return
-        visited.add(pos)
+        visited.append(pos)
         if self.field[pos].near_cnt == 0:
             around = []
             x, y = pos
@@ -147,7 +144,7 @@ class Field:
             self.field[pos].boom()
             return -1
         if self.field[pos].near_cnt == 0:
-            self.show_near_zeros(pos)
+            self.show_near_zeros(pos, [])
         self.show_field()
         return self.field[pos].near_cnt
     
@@ -171,14 +168,4 @@ class Field:
             else:
                 if obj.state.public == ' 🚩':
                     res = 0
-        return res
-    
-    def __str__(self) -> str:
-        res = ''
-        cnt = 0
-        for pos, obj in self.field.items():
-            res += str(obj)
-            cnt += 1
-            if cnt% self.size == 0:
-                res += '\n'
         return res
