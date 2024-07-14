@@ -2,7 +2,7 @@ import classes
 
 
 if __name__ == "__main__":
-    f = classes.Field(5, 2)
+    f = classes.Field(7, 5)
 
     while True:
         ans = input("Wanna play?(Y/n)")

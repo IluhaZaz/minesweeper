@@ -1,4 +1,5 @@
 from random import randint
+from icecream import ic
 
 from constants import SIZE_START_CNT, MINES_START_CNT
 
@@ -122,13 +123,13 @@ class Field:
             obj.is_shown = True
         self.is_active = False
     
-    def show_near_zeros(self, pos: tuple[int], visited: list = []):
+    def show_near_zeros(self, pos: tuple[int], visited: set = set()):
         if self.field.get(pos, None) is None:
             return
+        self.field[pos].show()
         if pos in visited:
             return
-        self.field[pos].show()
-        visited.append(pos)
+        visited.add(pos)
         if self.field[pos].near_cnt == 0:
             around = []
             x, y = pos
@@ -138,7 +139,6 @@ class Field:
             around.remove((x, y))
             for neighbour in around:
                 self.show_near_zeros(neighbour, visited)
-
     
     def check(self, x: int, y: int) -> int:
         pos = (y - 1, x - 1)
@@ -146,9 +146,9 @@ class Field:
         if type(self.field[pos]) == Mine:
             self.field[pos].boom()
             return -1
-        self.field[pos].show()
         if self.field[pos].near_cnt == 0:
             self.show_near_zeros(pos)
+        self.show_field()
         return self.field[pos].near_cnt
     
     def mark(self, x: int, y: int) -> bool:
@@ -157,6 +157,7 @@ class Field:
             self.field[pos].mark()
             return True
         self.field[pos].unmark()
+        self.show_field()
         return False
 
     def check_win(self) -> int:
@@ -170,4 +171,14 @@ class Field:
             else:
                 if obj.state.public == ' 🚩':
                     res = 0
+        return res
+    
+    def __str__(self) -> str:
+        res = ''
+        cnt = 0
+        for pos, obj in self.field.items():
+            res += str(obj)
+            cnt += 1
+            if cnt% self.size == 0:
+                res += '\n'
         return res
