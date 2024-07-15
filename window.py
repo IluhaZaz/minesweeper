@@ -46,7 +46,7 @@ class Ui_MainWindow(object):
         self.show_field()
         if res == -1:
             self.field.end_game(False)
-            self.smile.setIcon(QtGui.QIcon("pictures\\sad.jpg"))
+            self.smile.setIcon(QtGui.QIcon("pictures\\sad.png"))
     
     def set_flag(self, cell_num: int):
         if not self.field.is_active:
@@ -61,7 +61,7 @@ class Ui_MainWindow(object):
 
         match(self.check_win()):
             case 1:
-                self.smile.setIcon(QtGui.QIcon("pictures\\joy.jpg"))
+                self.smile.setIcon(QtGui.QIcon("pictures\\joy.png"))
                 self.show_all()
 
     def show_all(self):
@@ -113,34 +113,41 @@ class Ui_MainWindow(object):
         size = self.field.size
 
         MainWindow.setObjectName("Minesweeper")
-        MainWindow.resize(round(CELL_SIZE*(size + 3.5) + 2*HORIZONTAL_PADDING), 
-                          round(CELL_SIZE*(size + 2) + 2*VERTICAL_PADDING))
+        MainWindow.resize(round(CELL_SIZE*(size + 3.5) + 2*HORIZONTAL_PADDING + BORDER_W*size), 
+                          round(CELL_SIZE*(size + 2) + 2*VERTICAL_PADDING) + BORDER_W*size)
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("Minesweeper")
+        self.centralwidget.setStyleSheet("background: #b5b5b5;")
         
         self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(HORIZONTAL_PADDING, VERTICAL_PADDING,
-                                CELL_SIZE*size, CELL_SIZE*size)
+                                CELL_SIZE*size + BORDER_W*size, CELL_SIZE*size + BORDER_W*size)
         self.widget.setObjectName("widget")
 
         self.smile = QtWidgets.QPushButton(self.centralwidget)
-        self.smile.setIcon(QtGui.QIcon("pictures\\normal.jpg"))
-        self.smile.setIconSize(QtCore.QSize(2*CELL_SIZE, 2*CELL_SIZE))
-        self.smile.setGeometry(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+        self.smile.setIcon(QtGui.QIcon("pictures\\normal.png"))
+        self.smile.setIconSize(QtCore.QSize(3*CELL_SIZE - 2*BORDER_W, 
+                                            3*CELL_SIZE - 2*BORDER_W))
+        self.smile.setGeometry(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)) + BORDER_W*size, 
                                VERTICAL_PADDING + 10, 3*CELL_SIZE, 3*CELL_SIZE)
         self.smile.clicked.connect(lambda state, val = MainWindow: self.restart(val))
+        self.smile.setStyleSheet(f"border :{BORDER_W}px solid;"
+                                "border-top-color : #f0f0f0; "
+                                "border-left-color :#f0f0f0;"
+                                "border-right-color :gray;"
+                                "border-bottom-color : gray;")
 
         self.mines_slider = QtWidgets.QSlider(self.centralwidget)
         self.mines_slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.mines_slider.setRange(MIN_MINES_CNT, MAX_MINES_CNT)
         self.mines_slider.setValue(MINES_START_CNT)
         self.mines_slider.setFixedWidth(3*CELL_SIZE)
-        self.mines_slider.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+        self.mines_slider.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)) + BORDER_W*size, 
                                VERTICAL_PADDING + 3*CELL_SIZE + 20)
         
         self.mines_label = QtWidgets.QLabel(self.centralwidget)
-        self.mines_label.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+        self.mines_label.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)) + BORDER_W*size, 
                               VERTICAL_PADDING + 3*CELL_SIZE + 40)
         self.mines_label.setText(f"Mines count: {self.field.mines_cnt}")
         self.mines_label.setFixedWidth(3*CELL_SIZE)
@@ -152,18 +159,18 @@ class Ui_MainWindow(object):
         self.size_slider.setRange(MIN_SIZE_CNT, MAX_SIZE_CNT)
         self.size_slider.setValue(SIZE_START_CNT)
         self.size_slider.setFixedWidth(3*CELL_SIZE)
-        self.size_slider.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+        self.size_slider.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)) + BORDER_W*size, 
                               VERTICAL_PADDING + 3*CELL_SIZE + 60)
         
         self.size_label = QtWidgets.QLabel(self.centralwidget)
-        self.size_label.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)), 
+        self.size_label.move(HORIZONTAL_PADDING + round(CELL_SIZE*(size + 0.5)) + BORDER_W*size, 
                              VERTICAL_PADDING + 3*CELL_SIZE + 80)
         self.size_label.setText(f"Size: {self.field.size}")
         self.size_label.setFixedWidth(3*CELL_SIZE)
 
         self.size_slider.valueChanged.connect(self.onchange_size_slider)
 
-        self.gridLayout = QtWidgets.QGridLayout(spacing = 0)
+        self.gridLayout = QtWidgets.QGridLayout(spacing = BORDER_W)
         self.gridLayout.setObjectName("gridLayout")
 
         self.widget.setLayout(self.gridLayout)
@@ -173,8 +180,12 @@ class Ui_MainWindow(object):
             self.cells.append(QtWidgets.QPushButton(self.widget))
             self.cells[i].setObjectName(str(i))
             self.cells[i].setFixedSize(CELL_SIZE, CELL_SIZE)
-            self.cells[i].setStyleSheet("border :3px solid ;"
-                                         "background-color: gray;")
+            self.cells[i].setStyleSheet("background: #b5b5b5;"
+                                        f"border :{BORDER_W}px solid;"
+                                        "border-top-color : #f0f0f0; "
+                                        "border-left-color :#f0f0f0;"
+                                        "border-right-color :gray;"
+                                        "border-bottom-color : gray;")
             self.gridLayout.addWidget(self.cells[i], i//size, i%size, 1, 1)
             self.cells[i].clicked.connect(lambda state, x = i: self.onclick_cell(x))
         
@@ -184,9 +195,15 @@ class Ui_MainWindow(object):
         self.btn.setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
         self.btn.setFixedSize(round(1.5*CELL_SIZE), round(1.5*CELL_SIZE))
         self.btn.setGeometry(HORIZONTAL_PADDING + round((size/2 - 0.75)*CELL_SIZE), 
-                             round((size + 0.75)*CELL_SIZE), CELL_SIZE, CELL_SIZE)
+                             round((size + 0.75)*CELL_SIZE + BORDER_W*(size - 1)), 
+                             CELL_SIZE, CELL_SIZE)
         self.btn.clicked.connect(self.onclick_btn)
-
+        self.btn.setStyleSheet("background: #b5b5b5;"
+                                f"border :{BORDER_W}px solid;"
+                                "border-top-color : #f0f0f0; "
+                                "border-left-color :#f0f0f0;"
+                                "border-right-color :gray;"
+                                "border-bottom-color : gray;")
         
         MainWindow.setCentralWidget(self.centralwidget)
 
