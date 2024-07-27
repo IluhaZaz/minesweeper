@@ -8,17 +8,17 @@ class Ui_MainWindow(object):
     def __init__(self, size: int, mines_cnt: int):
         self.field = Field(size, mines_cnt)
         self.field.start_game()
-        self.btn_cliked: int = 0
+        self.shovel_on_btn: bool = True
 
     def onclick_cell(self, cell_num: int):
-        if self.btn_cliked%2 == 0:
+        if self.shovel_on_btn:
             self.check_and_show(cell_num)
         else:
             self.set_flag(cell_num)
     
     def onclick_btn(self):
-        self.btn_cliked += 1
-        if self.btn_cliked%2 == 0:
+        self.shovel_on_btn = False if self.shovel_on_btn else True
+        if self.shovel_on_btn:
             self.btn.setIcon(QtGui.QIcon("pictures\\shovel.png"))
             self.btn.setIconSize(QtCore.QSize(CELL_SIZE, CELL_SIZE))
         else:
@@ -96,7 +96,7 @@ class Ui_MainWindow(object):
                            int(self.mines_label.text()[13:]))
         self.field.start_game()
         
-        self.btn_cliked = 0
+        self.shovel_on_btn = True
 
         self.setupUi(MainWindow)
         self.mines_slider.setValue(self.field.mines_cnt)

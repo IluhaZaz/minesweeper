@@ -71,6 +71,8 @@ class Field:
         self.mines_cnt = mines_cnt
         self.is_active = False
         self.field: dict[tuple[int], Cell] = dict()
+        self.f_remain = self.mines_cnt
+        self.fake_flag = 0
 
     def have_mine_at(self, x: int, y: int) -> bool:
         if type(self.field[(x, y)]) == Mine:
@@ -142,7 +144,9 @@ class Field:
         self.field[pos].is_shown = True
         if type(self.field[pos]) == Mine:
             self.field[pos].boom()
+            self.end_game(False)
             return -1
+        
         if self.field[pos].near_cnt == 0:
             self.show_near_zeros(pos, [])
         self.show_field()
@@ -150,22 +154,29 @@ class Field:
     
     def mark(self, x: int, y: int) -> bool:
         pos = (y - 1, x - 1)
+
         if self.field[pos].state.public == '| |':
+
+            if type(self.field[pos]) == Mine:
+                self.f_remain -= 1
+            else:
+                self.fake_flag += 1
+
             self.field[pos].mark()
             return True
+        
+        if type(self.field[pos]) == Mine:
+            self.f_remain += 1
+        else:
+            self.fake_flag -=1
+
         self.field[pos].unmark()
         self.show_field()
         return False
 
     def check_win(self) -> int:
-        res: int = 1
-        for obj in self.field.values():
-            if type(obj) == Mine:
-                if obj.state.public == '| |':
-                    res = 0
-                if obj.state.hidden == f'|💥|':
-                    return -1
-            else:
-                if obj.state.public == ' 🚩':
-                    res = 0
-        return res
+        if not self.is_active:
+            return -1
+        if(self.f_remain == 0 and self.fake_flag == 0):
+            return 1
+        return 0
